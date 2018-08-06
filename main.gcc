@@ -1,0 +1,78 @@
+
+#include <avr/io.h>
+#include <stdlib.h>
+#include <time.h>
+#include <util/delay.h>
+
+#define SENSOR PB2
+#define LED_PIN PB3
+#define SPKR_SW PB4
+
+
+
+void play(int track){
+	int i=0;
+	while(i<track+1){
+		PORTB &= ~(1 << LED_PIN);
+		_delay_ms(500);
+		PORTB |= (1 << LED_PIN);
+		_delay_ms(100);
+		i++;
+	}
+
+}
+void adc_setup (void)
+{
+	ADMUX |= (1 << MUX0) | (1 << ADLAR);
+	ADCSRA |= (1 << ADPS1) | (1 << ADPS0) | (1 << ADEN);
+}
+
+void speaker_sw(int on){
+	if (on==0) {PORTB &= ~(1 << SPKR_SW);}
+	if (on==1) {PORTB |= (1 << SPKR_SW);}
+}
+
+
+void play1song(){
+	speaker_sw(0);
+	play(random()%5);
+	speaker_sw(1);
+	//_delay_ms(10000);
+	
+	
+}
+
+int main(void) {
+	int randomnum;
+	int lightstatus=0;
+	srand(time(NULL));
+	// Configure LED_PIN (PB4) as output
+	DDRB &= ~(1 << SENSOR);
+	DDRB |= (1 << SPKR_SW);
+	DDRB |= (1 << LED_PIN);
+	
+	adc_setup();
+	int adc_result;
+	while (1){
+		
+		ADCSRA |= (1 << ADSC);
+		adc_result = ADCH;
+		if ((adc_result<200)&&(lightstatus==1)){
+			lightstatus=0;
+			play1song();
+			_delay_ms(10000);
+		}
+		else {
+			speaker_sw(0);
+			if (adc_result>=200){lightstatus=1;}
+		}
+		_delay_ms(100);
+	}
+	//loop();
+	
+	
+	
+	return 0;
+}
+
+
