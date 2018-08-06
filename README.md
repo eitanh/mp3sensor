@@ -3,7 +3,7 @@
 mp3 chip with some sensors
 
 
-#Programming exmpale
+# Programming exmpale
 PS C:\Users\master\Downloads> .\avrdude.exe -c usbasp -p t13 -U flash:w:D:\atmel_projects\attiny13ablink\attiny13ablink\
 Debug\attiny13ablink.hex:i
 
