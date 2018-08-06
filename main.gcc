@@ -4,8 +4,9 @@
 #include <time.h>
 #include <util/delay.h>
 
+#define LED_PIN PB1
 #define SENSOR PB2
-#define LED_PIN PB3
+#define TRG_PIN PB3
 #define SPKR_SW PB4
 
 
@@ -13,9 +14,9 @@
 void play(int track){
 	int i=0;
 	while(i<track+1){
-		PORTB &= ~(1 << LED_PIN);
+		PORTB &= ~(1 << TRG_PIN);
 		_delay_ms(500);
-		PORTB |= (1 << LED_PIN);
+		PORTB |= (1 << TRG_PIN);
 		_delay_ms(100);
 		i++;
 	}
@@ -46,10 +47,11 @@ int main(void) {
 	int randomnum;
 	int lightstatus=0;
 	srand(time(NULL));
-	// Configure LED_PIN (PB4) as output
+	// Configure TRG_PIN (PB4) as output
 	DDRB &= ~(1 << SENSOR);
-	DDRB |= (1 << SPKR_SW);
 	DDRB |= (1 << LED_PIN);
+	DDRB |= (1 << SPKR_SW);
+	DDRB |= (1 << TRG_PIN);
 	
 	adc_setup();
 	int adc_result;
@@ -57,14 +59,19 @@ int main(void) {
 		
 		ADCSRA |= (1 << ADSC);
 		adc_result = ADCH;
-		if ((adc_result<200)&&(lightstatus==1)){
+		if ((adc_result>100)&&(lightstatus==1)){
+		//if (adc_result>100){
 			lightstatus=0;
+			//PORTB |= (1 << LED_PIN);
 			play1song();
 			_delay_ms(10000);
 		}
 		else {
 			speaker_sw(0);
-			if (adc_result>=200){lightstatus=1;}
+			
+			//PORTB &= ~(1 << LED_PIN);
+			
+			if (adc_result<80){lightstatus=1;}
 		}
 		_delay_ms(100);
 	}
@@ -74,5 +81,4 @@ int main(void) {
 	
 	return 0;
 }
-
 
